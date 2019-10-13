@@ -8,7 +8,6 @@
 class kassisk_method
 {
 private:
-    QFile output;
     int krok;
     QString sifrovany_text;
     QList<int> * dlzky;
@@ -17,6 +16,8 @@ private:
     void close_outputFstream();
     void calc_nasobky_dlzky_hesla();
 public:
+    QFile output;
+
     kassisk_method(QString pa_sifrovany_test,QString pathFor_bruteForce_oFile,int pa_krok=3);
     kassisk_method(QFile& file,int pa_krok=3);
     QString rozdel_na_casti(int dlzka_hesla,int part);
@@ -26,6 +27,7 @@ public:
 
     virtual ~kassisk_method();
     QList<int> *getDlzky() const;
+    QString getSifrovany_text() const;
 };
 
 #endif // KASSISK_METHOD_H

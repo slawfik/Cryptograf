@@ -3,6 +3,11 @@
 #include <QDebug>
 #include <string>
 
+QString kassisk_method::getSifrovany_text() const
+{
+    return sifrovany_text;
+}
+
 bool kassisk_method::init_outputFstream()
 {
     output.open(QFile::WriteOnly);
@@ -71,8 +76,10 @@ QString kassisk_method::rozdel_na_casti(int dlzka_hesla, int part)
 
 QString kassisk_method::toString_nasobkyHesla()
 {
-    QString ret = "Nasobky hesla: \n";
+    QString ret = "Kassiského metóda(3) nasobky hesla: \n";
     for(int i = 0;i<dlzky->length();i++)    {
+        if(!(i%10))
+            ret += '\n';
         ret += QString::number(dlzky->operator[](i)) + " ,";
     }
     return ret;
@@ -80,22 +87,21 @@ QString kassisk_method::toString_nasobkyHesla()
 
 QString kassisk_method::cezar(int *heslo, int dlzka_hesla)
 {
-    int poz;
+    int poz=0,sd,pop;
     QString S_heslo = "PASSWD: ";
     QString ret;
-
     for(int i=0;i<sifrovany_text.length();i++) {
         poz = i%dlzka_hesla;
-        int sd = heslo[poz];
-        int pop = sifrovany_text.operator[](i).unicode()-'A';
+        sd = heslo[poz];
+        pop = sifrovany_text.operator[](i).unicode()-'A';
         ret[i] = (((pop+26 - sd)%26)+'A');
     }
     for(int i=0;i<dlzka_hesla;i++)  {
         S_heslo.append(heslo[i]+'A');
     }
-    //size_t a = ret.toStdString().find('W');
-    //if(a == std::string::npos)
-        output.write('\n'+S_heslo.toLatin1()+'\n'+ret.toLatin1());
+    size_t a = ret.toStdString().find('W');
+    if(a == std::string::npos)
+        output.write(S_heslo.toLatin1()+'\n'+ret.toLatin1()+'\n');
     return ret;
 }
 
