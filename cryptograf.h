@@ -27,13 +27,25 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_button_desifruj_clicked();
+
+    void on_lineEdit_search_textChanged(const QString &arg1);
+
+    void on_spinBox_site_valueChanged(int arg1);
+
 private:
     Ui::Cryptograf *ui;
     kassisk_method *kass = nullptr;
     coicident_index *coint = nullptr;
 
+    int count_result_view = 0;
+    int site = 1;
+    QStringList list;
     QFile file;
+    QFile encryptedFile;
     QStringListModel crypted_model;
     QStringListModel encrypted_model;
+
+    void show_encrypted_results();
 };
 #endif // CRYPTOGRAF_H

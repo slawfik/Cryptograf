@@ -85,37 +85,54 @@ QString kassisk_method::toString_nasobkyHesla()
     return ret;
 }
 
-QString kassisk_method::cezar(int *heslo, int dlzka_hesla)
+void kassisk_method::cezar(int *heslo, int dlzka_hesla)
 {
-    int poz=0,sd,pop;
+    int poz=0,pop;
     QString S_heslo = "PASSWD: ";
     QString ret;
     for(int i=0;i<sifrovany_text.length();i++) {
         poz = i%dlzka_hesla;
-        sd = heslo[poz];
         pop = sifrovany_text.operator[](i).unicode()-'A';
-        ret[i] = (((pop+26 - sd)%26)+'A');
+        ret[i] = (((pop+26 - heslo[poz])%26)+'A');
     }
     for(int i=0;i<dlzka_hesla;i++)  {
         S_heslo.append(heslo[i]+'A');
     }
     size_t a = ret.toStdString().find('W');
-    if(a == std::string::npos)
+    //size_t b = ret.toStdString().find('Q');
+    if(a == std::string::npos/* && b == std::string::npos*/){
         output.write(S_heslo.toLatin1()+'\n'+ret.toLatin1()+'\n');
+        poced_desifrovanych++;
+    }
+}
+
+QString kassisk_method::cezar_ret(int *heslo, int dlzka_hesla)
+{
+    int poz=0,pop;
+    QString S_heslo = "PASSWD: ";
+    QString ret;
+    for(int i=0;i<sifrovany_text.length();i++) {
+        poz = i%dlzka_hesla;
+        pop = sifrovany_text.operator[](i).unicode()-'A';
+        ret[i] = (((pop+26 - heslo[poz])%26)+'A');
+    }
+    for(int i=0;i<dlzka_hesla;i++)  {
+        S_heslo.append(heslo[i]+'A');
+    }
     return ret;
 }
 
-void kassisk_method::brute_force_kassisk(int dlzka_hesla,int pom)
+int kassisk_method::brute_force_kassisk(int dlzka_hesla,int pom)
 {
     static int heslo[10];
     //prve volanie funkcie pom=0 inicializuje fstream pre výsledky
     if(pom == 0)    {
         bool fs = init_outputFstream();
         if(!fs)
-            return;
+            return 0;
     }
     if(dlzka_hesla >= 10)
-        return;
+        return 0;
 
     for(int i = 0;i<26;i++) {
         heslo[pom] = i;
@@ -128,7 +145,9 @@ void kassisk_method::brute_force_kassisk(int dlzka_hesla,int pom)
     // prve volanie funkcie pom=0 otvorilo fstream aj si ho zatvorí
     if(pom == 0)    {
         output.close();
+        return poced_desifrovanych;
     }
+    return 0;
 }
 
 QList<int> *kassisk_method::getDlzky() const
