@@ -16,17 +16,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    bruteforceset.cpp \
     coicident_index.cpp \
     kassisk_method.cpp \
     main.cpp \
     cryptograf.cpp
 
 HEADERS += \
+    bruteforceset.h \
     coicident_index.h \
     cryptograf.h \
     kassisk_method.h
 
 FORMS += \
+    bruteforceset.ui \
     cryptograf.ui
 
 # Default rules for deployment.
