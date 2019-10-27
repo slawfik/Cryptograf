@@ -29,11 +29,17 @@ bool kassisk_method::init_outputFstream()
 
 void kassisk_method::calc_nasobky_dlzky_hesla()
 {
+    int pom;
     for(int poz2 = 0;poz2 < sifrovany_text.length()-3;poz2++)   {
         for(int poz = poz2+1;poz < sifrovany_text.length()-3;poz++)   {
             if(sifrovany_text[poz2] == sifrovany_text[poz] && sifrovany_text[poz2+1] == sifrovany_text[poz+1]
-                    && sifrovany_text[poz2+2] == sifrovany_text[poz+2])
-                dlzky->append(poz-poz2);
+                    && sifrovany_text[poz2+2] == sifrovany_text[poz+2]){
+                pom=poz-poz2;
+                if(pom < 50){
+                    dlzky->append(pom);
+                }
+            }
+
         }
     }
 }
@@ -146,15 +152,9 @@ void kassisk_method::zistiPravdepodobnostiZnakov(QString part,QList<double>&  pr
     double part_sif_txt_len = part.size();
     QString::iterator it;
 
-    for(int i = 0;i<26;i++){
-        pom = 0;
-        for(it = part.begin();it != part.end();it++){
-            if(i == *it) {
-                pom++;
-            }
-        }
+    for(int i = 65;i<92;i++){
+        pom = part.count(QChar(i));
         pravd_part.push_back(static_cast<double>(pom)/part_sif_txt_len);
-        //pravd_part.insert(QChar(i+65),static_cast<double>(pom)/part_sif_txt_len);
     }
 }
 
@@ -163,18 +163,24 @@ double kassisk_method::vzdialenost_vektorov(bool use_svk_pravd,QList<double>&  p
     double sum = 0;
     if(use_svk_pravd){
         for(int i = 0;i<pravd_part.size();i++){
-            sum += pow(pravd_part[i]-svk_pravdepodobnosti[i],2);
+            sum += pow(pravd_part[i]- svk_pravdepodobnosti.find(QChar(i+'A')).value(),2);
+        }
+        return sqrt(sum);
+    } else {
+        for(int i = 0;i<pravd_part.size();i++){
+            sum += pow(pravd_part[i]- en_pravdepodobnosti.find(QChar(i+'A')).value(),2);
         }
         return sqrt(sum);
     }
-    return 0.777;
 }
 
 QString kassisk_method::part_cezar(int *heslo, int dlzka_hesla, QString part)
 {
+    int znak;
     QString ret;
     for(int i=0;i<part.length();i++) {
-        ret[i] = ((part[i].unicode()+26 - heslo[i%dlzka_hesla])%26);
+        znak = part[i].unicode()-'A';
+        ret[i] = ((znak+26 - heslo[i%dlzka_hesla])%26)+'A';
     }
     return ret;
 }
@@ -218,15 +224,15 @@ QString kassisk_method::sum_4_najpocetnejsieZnaky(QString part_sifrovanehoTextu)
 
 QString kassisk_method::cezar_ret(int *heslo, int dlzka_hesla)
 {
-    /*int pop;
-    int ps = 0;*/
-    QString ret;
-    for(int i=0;i<sifrovany_text.length();i++) {
-        //pop=sifrovany_text.operator[](i)-'A';
-        //if(pop >= 0 && pop <= 26)   {
-            ret[i] = (((sifrovany_text.operator[](i)+26 - heslo[i%dlzka_hesla])%26)+'A');
-            //ps++;
-        //}
+    int pop;
+    int ps = 0;
+    QString ret = read_allText;
+    for(int i=0;i<ret.length();i++) {
+        pop=ret.operator[](i).unicode()-'A';
+        if(pop >= 0 && pop <= 26)   {
+            ret[i] = (((pop+26 - heslo[ps%dlzka_hesla])%26)+'A');
+            ps++;
+        }
     }
     return ret;
 }
@@ -302,33 +308,45 @@ QString kassisk_method::break_passwd(int dlzka_hesla)
     QList<double> pravd_part;
     QString part;
     QString desifrovany_part;
-    double min;
-    int index;
-    QList<double> pravdepodobnosti_znakov;
-    QString heslo;
+    double min_SK,min_EN;
+    int index_SK,index_EN;
+    QList<double> pravdepodobnosti_znakov_SK;
+    QList<double> pravdepodobnosti_znakov_EN;
+    QString heslo_SK,heslo_EN;
 
-    for(int i =0;i<dlzka_hesla;i++) {
-        pravd_part.clear();
+    for(int i =1;i<dlzka_hesla+1;i++) {
         part = rozdel_na_casti(dlzka_hesla,i);
-        for(int j = 65;j<93;j++)    {
-            desifrovany_part = cezar_ret(&j,1);
+        for(int j = 0;j<27;j++)    {
+            pravd_part.clear();
+            desifrovany_part = part_cezar(&j,1,part);
             zistiPravdepodobnostiZnakov(desifrovany_part,pravd_part);
-            pravdepodobnosti_znakov.push_back(vzdialenost_vektorov(true,pravd_part));
+            pravdepodobnosti_znakov_SK.push_back(vzdialenost_vektorov(true,pravd_part));
+            pravdepodobnosti_znakov_EN.push_back(vzdialenost_vektorov(false,pravd_part));
         }
-        min = pravdepodobnosti_znakov.first();
-        index = 0;
-        for(int j = 0;j<pravdepodobnosti_znakov.last();j++)  {
-            if(min > pravdepodobnosti_znakov[j])   {
-                min = pravdepodobnosti_znakov[j];
-                index = j;
+        min_SK = pravdepodobnosti_znakov_SK.first();
+        min_EN = pravdepodobnosti_znakov_EN.first();
+        index_SK = 0;
+        index_EN = 0;
+        for(int j = 0;j<pravdepodobnosti_znakov_SK.size();j++)  {
+            if(min_SK > pravdepodobnosti_znakov_SK[j])   {
+                min_SK = pravdepodobnosti_znakov_SK[j];
+                index_SK = j;
             }
         }
-
-        heslo.append(QChar(index+65));
+        for(int j = 0;j<pravdepodobnosti_znakov_EN.size();j++)  {
+            if(min_EN > pravdepodobnosti_znakov_EN[j])   {
+                min_EN = pravdepodobnosti_znakov_EN[j];
+                index_EN = j;
+            }
+        }
+        pravdepodobnosti_znakov_SK.clear();
+        pravdepodobnosti_znakov_EN.clear();
+        heslo_SK.append(QChar(index_SK+65));
+        heslo_EN.append(QChar(index_EN+65));
         //zistiPravdepodobnostiZnakov(dlzka_hesla,i,pravd_part);
         //dlzky vektorov
     }
-    return heslo;
+    return "heslo_SK: " + heslo_SK + "\nheslo_EN: " + heslo_EN;
 }
 
 QList<int> *kassisk_method::getDlzky() const

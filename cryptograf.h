@@ -41,6 +41,7 @@ private:
 
     int bruteforcePass_len;
     QList<QList<QChar>*> najpocetnejsie_znaky;
+    QStringList cryptedlist;
     QStringList list;
     QFile file;
     QFile encryptedFile;

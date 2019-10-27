@@ -39,7 +39,6 @@ Cryptograf::~Cryptograf()
 void Cryptograf::on_button_openCryptFile_clicked()
 {
     QString pa_path;
-    QStringList list;
 
     pa_path = QFileDialog::getOpenFileName(this,tr("Open .txt file"),".","All files (*.txt*)");
     if(pa_path == ""){
@@ -55,8 +54,9 @@ void Cryptograf::on_button_openCryptFile_clicked()
         delete kass;
         kass = new kassisk_method(file);
     }
-    list.push_back(kass->getSifrovany_text());
-    crypted_model.setStringList(list);
+    cryptedlist.clear();
+    cryptedlist.push_back(kass->getSifrovany_text());
+    crypted_model.setStringList(cryptedlist);
     ui->listView_Crypted->setModel(&crypted_model);
 }
 
@@ -84,10 +84,10 @@ void Cryptograf::on_button_startAttack_clicked()
     }
 }
 
+
 /*TLACIDLO INDEX COENCIDENCIE*/
 void Cryptograf::on_pushButton_clicked()
 {
-    QStringList list;
     QString part;
     QString poctyZnakov;
     QString print = "\n";
@@ -101,9 +101,10 @@ void Cryptograf::on_pushButton_clicked()
     for (int i =0;i<dlzka_hesla;i++) {
         najpocetnejsie_znaky.push_back(new QList<QChar>);
     }
+    cryptedlist.clear();
 
-    list.push_back(kass->getSifrovany_text());
-    list.push_back(kass->toString_nasobkyHesla());
+    cryptedlist.push_back(kass->getSifrovany_text());
+    cryptedlist.push_back(kass->toString_nasobkyHesla());
     for (int i = 1;i<=dlzka_hesla;i++) {
         part = kass->rozdel_na_casti(dlzka_hesla,i);
         poctyZnakov = "PART_" + QString::number(i)+":  ";// + part+"\n\n";
@@ -112,14 +113,14 @@ void Cryptograf::on_pushButton_clicked()
         najpocetnejsie_znaky[i-1]->push_back(poctyZnakov.split('-')[1].back());
         najpocetnejsie_znaky[i-1]->push_back(poctyZnakov.split('-')[2].back());
         najpocetnejsie_znaky[i-1]->push_back(poctyZnakov.split('-')[3].back());
-        list.push_back(poctyZnakov);
+        cryptedlist.push_back(poctyZnakov);
 
         coicident_index co(part);
         print += "Časť " + QString::number(i) + " : " + co.toQString() + "\n";
     }
-    list.push_back(print);
+    cryptedlist.push_back(print);
 
-    crypted_model.setStringList(list);
+    crypted_model.setStringList(cryptedlist);
 }
 
 void Cryptograf::on_button_desifruj_clicked()
@@ -165,5 +166,8 @@ void Cryptograf::on_pushButton_2_clicked()
 
 void Cryptograf::on_btn_zistiHeslo_clicked()
 {
-    qDebug() << "heslo " << kass->break_passwd(ui->spinBox_pasLenCrypted->value());
+    QString heslo = kass->break_passwd(ui->spinBox_pasLenCrypted->value());
+    cryptedlist.push_front(heslo);
+    crypted_model.setStringList(cryptedlist);
+    qDebug().noquote() << heslo;
 }
