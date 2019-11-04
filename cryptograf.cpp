@@ -88,6 +88,7 @@ void Cryptograf::on_button_startAttack_clicked()
 /*TLACIDLO INDEX COENCIDENCIE*/
 void Cryptograf::on_pushButton_clicked()
 {
+    double index;
     QString part;
     QString poctyZnakov;
     QString print = "\n";
@@ -115,9 +116,18 @@ void Cryptograf::on_pushButton_clicked()
         najpocetnejsie_znaky[i-1]->push_back(poctyZnakov.split('-')[3].back());
         cryptedlist.push_back(poctyZnakov);
 
-        coicident_index co(part);
-        print += "Časť " + QString::number(i) + " : " + co.toQString() + "\n";
     }
+    for (int i =20;i<30;i++) {
+        index = 0;
+        for (int j = 1;j<i+1;j++) {
+            part = kass->rozdel_na_casti(i,j);
+            coicident_index co(part);
+            index += co.getIndex_coincidencie();
+        }
+        index = index/ static_cast<double>(i);
+        print += "Dĺžka hesla " + QString::number(i) + " : priemerný coIndex = " + QString::number(index) + "\n";
+    }
+
     cryptedlist.push_back(print);
 
     crypted_model.setStringList(cryptedlist);
@@ -169,5 +179,5 @@ void Cryptograf::on_btn_zistiHeslo_clicked()
     QString heslo = kass->break_passwd(ui->spinBox_pasLenCrypted->value());
     cryptedlist.push_front(heslo);
     crypted_model.setStringList(cryptedlist);
-    qDebug().noquote() << heslo;
+    //qDebug().noquote() << heslo;
 }
