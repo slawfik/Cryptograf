@@ -2,9 +2,9 @@
 
 Desifrovanie vigenerovskej sifry:
 
-![alt text](https://github.com/slawfik/Cryptograf/images/videnerovska sifra.png)
+![Prelomenie hesla pomocou frekvenčnej analýzy jazyka](https://github.com/slawfik/Cryptograf/blob/master/images/videnerovska%20sifra.png)
 
 
 Nastavovanie bruteforce utoku na vigenerovsku sifru:
 
-![alt text](https://github.com/slawfik/Cryptograf/images/brute_force.png)
+![BruteForce](https://github.com/slawfik/Cryptograf/blob/master/images/brute_force.png)
